@@ -1,18 +1,18 @@
 import React from 'react';
-import { initMap } from '../utils';
-import { maps as settings } from '../settings';
-
-const { id, options } = settings;
+import settings from '../settings';
 
 class Maps extends React.Component {
-    render(){
-        return (
-            <div id={id} />
-        )
-    }
-    componentDidMount(){
-        initMap(id, options)
-    }
+  constructor(props) {
+    super(props);
+    this.state = {
+      renderedMarkers: [],
+    };
+  }
+
+  render() {
+    const { id } = settings;
+    return <div id={id} />;
+  }
 }
 
 export default Maps;
