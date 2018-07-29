@@ -1,10 +1,10 @@
 import googleMaps from 'google-maps';
-import settings from '../settings';
+import { mapSettings, polylineSettings } from '../settings';
 
 let api = null;
 
 export const initMap = (callback) => {
-  const { mapId, key, options } = settings;
+  const { mapId, key, options } = mapSettings;
   googleMaps.KEY = key;
   googleMaps.load((google) => {
     api = google.maps;
@@ -28,10 +28,7 @@ export const createMarker = (marker) => {
 export const createRoute = (paths) => {
   return new api.Polyline({
     path: paths,
-    geodesic: true,
-    strokeColor: '#FF0000',
-    strokeOpacity: 1.0,
-    strokeWeight: 2,
+    ...polylineSettings,
   });
 };
 
@@ -39,4 +36,31 @@ export const getPathsFromMarkers = (markers) => {
   return markers.reduce((acc, { position: { lat, lng } }) => {
     return [...acc, { lat, lng }];
   }, []);
+};
+
+export const getNewMarkerPosition = (event) => {
+  const { latLng: { lat, lng } } = event;
+  return {
+    lat: lat(),
+    lng: lng(),
+  };
+};
+
+export const updateMarkersAfterMove = (markers, id, position) => {
+  return markers.map((marker) => {
+    return marker.id !== id ? marker : {
+      title: marker.title,
+      id: marker.id,
+      position,
+    };
+  });
+};
+
+export const removeMarkerFromMap = (id, markers) => {
+  markers.map((marker) => {
+    if (marker.id === id) {
+      marker.setMap(null);
+    }
+    return marker;
+  });
 };
