@@ -3,18 +3,18 @@ import { SortableContainer, SortableElement } from 'react-sortable-hoc';
 
 const SortableItem = SortableElement(({ title, deleteMarker, id }) => {
   return (
-    <li>
+    <li className="list-group-item">
       <span>
         {title}
       </span>
-      <button onClick={() => deleteMarker(id)} type="button">Remove</button>
+      <button className="btn btn-danger btn-sm ml-2" onClick={() => deleteMarker(id)} type="button">Delete</button>
     </li>
-  )
+  );
 });
 
 const SortableList = SortableContainer(({ items, deleteMarker }) => {
   return (
-    <ul>
+    <ul className="list-group">
       {items.map(({ title, id }, index) => (
         <SortableItem
           key={`item-${id}`}

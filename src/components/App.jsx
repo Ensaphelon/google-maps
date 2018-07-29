@@ -101,10 +101,16 @@ export default class App extends React.Component {
     const { map, markers } = this.state;
     const { mapId } = mapSettings;
     return (
-      <div>
-        <MarkersList deleteMarker={deleteMarker} afterSort={afterSort} markers={markers} />
-        <AddMarkerForm addMarker={addMarker} map={map} />
-        <div id={mapId} />
+      <div className="container-fluid">
+        <div className="row">
+          <div className="col-xs-12 col-sm-4">
+            <AddMarkerForm addMarker={addMarker} map={map} />
+            <MarkersList deleteMarker={deleteMarker} afterSort={afterSort} markers={markers} />
+          </div>
+          <div className="col-xs-12 col-sm-8">
+            <div id={mapId} />
+          </div>
+        </div>
       </div>
     );
   }
