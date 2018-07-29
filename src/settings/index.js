@@ -1,5 +1,5 @@
 export default {
-  id: 'google-maps',
+  mapId: 'google-maps',
   key: 'AIzaSyDwsjGYZpUITk4k0VQErn3pgkFdMI4dR7M',
   options: {
     zoom: 8,

@@ -4,12 +4,12 @@ import settings from '../settings';
 let api = null;
 
 export const initMap = (callback) => {
-  const { id, key, options } = settings;
+  const { mapId, key, options } = settings;
   googleMaps.KEY = key;
   googleMaps.load((google) => {
     api = google.maps;
     const map = new api.Map(
-      document.getElementById(id),
+      document.getElementById(mapId),
       options,
     );
     callback(map);
@@ -18,7 +18,11 @@ export const initMap = (callback) => {
 
 export const createMarker = (marker) => {
   const { position, title } = marker;
-  return new api.Marker({ position, title, draggable: true });
+  return new api.Marker({
+    position,
+    title,
+    draggable: true,
+  });
 };
 
 export const createRoute = (paths) => {

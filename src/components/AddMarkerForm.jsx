@@ -1,4 +1,5 @@
 import React from 'react';
+import { uniqueId } from 'lodash';
 
 export default class AddMarkerForm extends React.Component {
   constructor(props) {
@@ -14,6 +15,7 @@ export default class AddMarkerForm extends React.Component {
     const { value } = this.state;
     addMarker({
       title: value,
+      id: uniqueId(),
       position: {
         lat: map.center.lat(),
         lng: map.center.lng(),
