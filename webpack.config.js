@@ -15,6 +15,10 @@ module.exports = {
         test: /\.html$/,
         use: 'html-loader',
       },
+      {
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader'],
+      },
     ],
   },
   plugins: [
@@ -22,5 +26,5 @@ module.exports = {
       template: './src/index.html',
       filename: './index.html',
     }),
-  ]
+  ],
 };

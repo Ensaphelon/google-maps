@@ -22,6 +22,7 @@
     "semi": "warn",
     "arrow-body-style": "off",
     "import/extensions": "always",
-    "react/prop-types": "off"
+    "react/prop-types": "off",
+    "react/jsx-one-expression-per-line": "off"
   }
 }

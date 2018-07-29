@@ -33,9 +33,13 @@ export default class AddMarkerForm extends React.Component {
   render() {
     const { value } = this.state;
     return (
-      <form onSubmit={this.submit}>
-        <input type="text" onChange={this.updateMarkerName} value={value} />
-        <button type="submit" />
+      <form className="form-inline mb-2 mt-3" onSubmit={this.submit}>
+        <div className="form-group">
+          <input className="form-control" type="text" onChange={this.updateMarkerName} value={value} />
+        </div>
+        <button className="btn btn-xm btn-primary" type="submit">
+          <span>Add marker</span>
+        </button>
       </form>
     );
   }
