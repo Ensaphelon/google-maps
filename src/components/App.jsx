@@ -7,9 +7,11 @@ import {
   createMarker,
   getPathsFromMarkers,
   createRoute,
+  getNewMarkerPosition,
+  updateMarkersAfterMove,
+  removeMarkerFromMap,
 } from '../utils';
-import settings from '../settings';
-
+import { mapSettings } from '../settings';
 
 export default class App extends React.Component {
   constructor(props) {
@@ -26,48 +28,33 @@ export default class App extends React.Component {
     initMap(this.storeMapInComponent);
   }
 
-  storeMapInComponent = (map) => {
-    this.setState({ map });
-  }
-
   addMarker = (marker) => {
+    const { renderMarker, renderRoute } = this;
     const { markers, map } = this.state;
-    const { renderMarker } = this;
     const newMarkers = [...markers, marker];
     this.setState({
       markers: newMarkers,
     });
-    renderMarker(marker, markers.length, map);
-    this.renderRoute(getPathsFromMarkers(newMarkers));
+    renderMarker(marker, map);
+    renderRoute(getPathsFromMarkers(newMarkers));
   }
 
-  updateMarker = (updatedMarkerId, event) => {
+  storeMapInComponent = (map) => {
+    this.setState({ map });
+  }
+
+  moveMarker = (id, event) => {
     const { markers } = this.state;
-    const updatedMarkers = markers.map((marker) => {
-      return marker.id !== updatedMarkerId ? marker : {
-        title: marker.title,
-        id: marker.id,
-        position: {
-          lat: event.latLng.lat(),
-          lng: event.latLng.lng(),
-        },
-      };
-    });
-    this.setState({
-      markers: updatedMarkers,
-    });
+    const position = getNewMarkerPosition(event);
+    const updatedMarkers = updateMarkersAfterMove(markers, id, position);
+    this.setState({ markers: updatedMarkers });
     this.renderRoute(getPathsFromMarkers(updatedMarkers));
   }
 
   deleteMarker = (id) => {
     const { markers, renderedMarkers } = this.state;
     const newMarkers = markers.filter(marker => marker.id !== id);
-    renderedMarkers.map((marker) => {
-      if (marker.id === id) {
-        marker.setMap(null);
-      }
-      return marker;
-    });
+    removeMarkerFromMap(id, renderedMarkers);
     this.setState({
       markers: newMarkers,
       renderedMarkers: renderedMarkers.filter(marker => marker.id !== id),
@@ -96,13 +83,14 @@ export default class App extends React.Component {
     });
   }
 
-  renderMarker = (marker, index, mapInstance) => {
-    const { updateMarker } = this;
+  renderMarker = (marker, mapInstance) => {
+    const { moveMarker } = this;
     const { renderedMarkers } = this.state;
+    const { id } = marker;
     const newMarker = createMarker(marker);
     newMarker.setMap(mapInstance);
-    newMarker.id = marker.id;
-    newMarker.addListener('dragend', e => updateMarker(newMarker.id, e));
+    newMarker.id = id;
+    newMarker.addListener('dragend', e => moveMarker(id, e));
     this.setState({
       renderedMarkers: [...renderedMarkers, newMarker],
     });
@@ -111,7 +99,7 @@ export default class App extends React.Component {
   render() {
     const { addMarker, afterSort, deleteMarker } = this;
     const { map, markers } = this.state;
-    const { mapId } = settings;
+    const { mapId } = mapSettings;
     return (
       <div>
         <MarkersList deleteMarker={deleteMarker} afterSort={afterSort} markers={markers} />

@@ -21,6 +21,7 @@
     "global-require": "off",
     "semi": "warn",
     "arrow-body-style": "off",
-    "import/extensions": "always"
+    "import/extensions": "always",
+    "react/prop-types": "off"
   }
 }
