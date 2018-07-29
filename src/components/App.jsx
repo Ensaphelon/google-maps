@@ -1,13 +1,22 @@
 import React from 'react';
-import Maps from './Maps.jsx';
+import { arrayMove } from 'react-sortable-hoc';
 import AddMarkerForm from './AddMarkerForm.jsx';
-import { initMap, createMarker, getPathsFromMarkers, createRoute } from '../utils';
+import MarkersList from './MarkersList.jsx';
+import {
+  initMap,
+  createMarker,
+  getPathsFromMarkers,
+  createRoute,
+} from '../utils';
+import settings from '../settings';
+
 
 export default class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       markers: [],
+      renderedMarkers: [],
       route: null,
       map: null,
     };
@@ -32,27 +41,47 @@ export default class App extends React.Component {
     this.renderRoute(getPathsFromMarkers(newMarkers));
   }
 
-  updateMarker = (updatedMarkerIndex, event) => {
+  updateMarker = (updatedMarkerId, event) => {
     const { markers } = this.state;
-    this.setState({
-      markers: markers.map((marker, index) => {
-        return index !== updatedMarkerIndex ? marker : {
-          title: marker.title,
-          position: {
-            lat: event.latLng.lat(),
-            lng: event.latLng.lng(),
-          },
-        };
-      }),
+    const updatedMarkers = markers.map((marker) => {
+      return marker.id !== updatedMarkerId ? marker : {
+        title: marker.title,
+        id: marker.id,
+        position: {
+          lat: event.latLng.lat(),
+          lng: event.latLng.lng(),
+        },
+      };
     });
-    this.renderRoute(getPathsFromMarkers(this.state.markers));
+    this.setState({
+      markers: updatedMarkers,
+    });
+    this.renderRoute(getPathsFromMarkers(updatedMarkers));
   }
 
-  renderMarker = (marker, index, mapInstance) => {
-    const { updateMarker } = this;
-    const newMarker = createMarker(marker);
-    newMarker.setMap(mapInstance);
-    newMarker.addListener('dragend', updateMarker.bind({}, index));
+  deleteMarker = (id) => {
+    const { markers, renderedMarkers } = this.state;
+    const newMarkers = markers.filter(marker => marker.id !== id);
+    renderedMarkers.map((marker) => {
+      if (marker.id === id) {
+        marker.setMap(null);
+      }
+      return marker;
+    });
+    this.setState({
+      markers: newMarkers,
+      renderedMarkers: renderedMarkers.filter(marker => marker.id !== id),
+    });
+    this.renderRoute(getPathsFromMarkers(newMarkers));
+  }
+
+  afterSort = ({ oldIndex, newIndex }) => {
+    const { markers } = this.state;
+    const sortedMarkers = arrayMove(markers, oldIndex, newIndex);
+    this.setState({
+      markers: sortedMarkers,
+    });
+    this.renderRoute(getPathsFromMarkers(sortedMarkers));
   }
 
   renderRoute = (path) => {
@@ -67,13 +96,27 @@ export default class App extends React.Component {
     });
   }
 
+  renderMarker = (marker, index, mapInstance) => {
+    const { updateMarker } = this;
+    const { renderedMarkers } = this.state;
+    const newMarker = createMarker(marker);
+    newMarker.setMap(mapInstance);
+    newMarker.id = marker.id;
+    newMarker.addListener('dragend', e => updateMarker(newMarker.id, e));
+    this.setState({
+      renderedMarkers: [...renderedMarkers, newMarker],
+    });
+  }
+
   render() {
-    const { addMarker } = this;
-    const { map } = this.state;
+    const { addMarker, afterSort, deleteMarker } = this;
+    const { map, markers } = this.state;
+    const { mapId } = settings;
     return (
       <div>
+        <MarkersList deleteMarker={deleteMarker} afterSort={afterSort} markers={markers} />
         <AddMarkerForm addMarker={addMarker} map={map} />
-        <Maps />
+        <div id={mapId} />
       </div>
     );
   }
