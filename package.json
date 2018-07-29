@@ -6,7 +6,7 @@
   "scripts": {
     "build": "webpack --mode production",
     "start": "webpack-dev-server --open --mode development",
-    "eslint": "eslint src/**",
+    "eslint": "eslint src",
     "test": "jest"
   },
   "keywords": [
