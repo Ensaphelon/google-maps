@@ -1,4 +1,5 @@
 import React from 'react';
+import cn from 'class-names';
 import { uniqueId } from 'lodash';
 
 export default class AddMarkerForm extends React.Component {
@@ -6,6 +7,7 @@ export default class AddMarkerForm extends React.Component {
     super(props);
     this.state = {
       value: '',
+      isValid: true,
     };
   }
 
@@ -27,15 +29,22 @@ export default class AddMarkerForm extends React.Component {
 
   updateMarkerName = (e) => {
     const { value } = e.target;
-    this.setState({ value });
+    this.setState({
+      value,
+      isValid: value.length > 0
+    });
   }
 
   render() {
     const { value } = this.state;
+    const inputClass = cn({
+      'form-control': true,
+      'is-invalid': !this.state.isValid,
+    })
     return (
       <form className="form-inline mb-2 mt-3" onSubmit={this.submit}>
         <div className="form-group">
-          <input className="form-control" type="text" onChange={this.updateMarkerName} value={value} />
+          <input required className={inputClass} type="text" onChange={this.updateMarkerName} value={value} />
         </div>
         <button className="btn btn-xm btn-primary" type="submit">
           <span>Add marker</span>

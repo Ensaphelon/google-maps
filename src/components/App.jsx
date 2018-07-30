@@ -10,6 +10,7 @@ import {
   getNewMarkerPosition,
   updateMarkersAfterMove,
   removeMarkerFromMap,
+  createInfoWindow,
 } from '../utils';
 import { mapSettings } from '../settings';
 
@@ -85,12 +86,14 @@ export default class App extends React.Component {
 
   renderMarker = (marker, mapInstance) => {
     const { moveMarker } = this;
-    const { renderedMarkers } = this.state;
+    const { renderedMarkers, map } = this.state;
     const { id } = marker;
     const newMarker = createMarker(marker);
+    const infoWindow = createInfoWindow(marker.title);
     newMarker.setMap(mapInstance);
     newMarker.id = id;
     newMarker.addListener('dragend', e => moveMarker(id, e));
+    newMarker.addListener('click', () => infoWindow.open(map, newMarker));
     this.setState({
       renderedMarkers: [...renderedMarkers, newMarker],
     });
