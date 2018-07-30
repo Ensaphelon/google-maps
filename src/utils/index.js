@@ -25,6 +25,12 @@ export const createMarker = (marker) => {
   });
 };
 
+export const createInfoWindow = (title) => {
+  return new api.InfoWindow({
+    content: title,
+  });
+};
+
 export const createRoute = (paths) => {
   return new api.Polyline({
     path: paths,
