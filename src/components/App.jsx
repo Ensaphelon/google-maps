@@ -2,16 +2,6 @@ import React from 'react';
 import { arrayMove } from 'react-sortable-hoc';
 import AddMarkerForm from './AddMarkerForm.jsx';
 import MarkersList from './MarkersList.jsx';
-import {
-  initMap,
-  createMarker,
-  getPathsFromMarkers,
-  createRoute,
-  getNewMarkerPosition,
-  updateMarkersAfterMove,
-  removeMarkerFromMap,
-  createInfoWindow,
-} from '../utils';
 import { mapSettings } from '../settings';
 
 export default class App extends React.Component {
@@ -26,58 +16,71 @@ export default class App extends React.Component {
   }
 
   componentDidMount = () => {
-    initMap(this.storeMapInComponent);
+    const { provider } = this.props;
+    this.setState({ map: provider.initMap() });
   }
 
-  addMarker = (marker) => {
-    const { renderMarker, renderRoute } = this;
+  addMarker = (markerData) => {
+    const { renderMarker, renderRoute, bindMarkerEvents } = this;
+    const { provider } = this.props;
     const { markers, map } = this.state;
-    const newMarkers = [...markers, marker];
+    const { id } = markerData;
+    const newMarkers = [...markers, markerData];
+    const marker = provider.createMarker(markerData);
+    const infoWindow = provider.createInfoWindow(markerData.title);
+    marker.id = id;
+    bindMarkerEvents(marker, infoWindow, map);
+    renderMarker(marker, map);
+    renderRoute(provider.getPathsFromMarkers(newMarkers));
     this.setState({
       markers: newMarkers,
     });
-    renderMarker(marker, map);
-    renderRoute(getPathsFromMarkers(newMarkers));
   }
 
-  storeMapInComponent = (map) => {
-    this.setState({ map });
+  bindMarkerEvents = (marker, infoWindow, map) => {
+    const { moveMarker } = this;
+    marker.addListener('dragend', e => moveMarker(marker.id, e));
+    marker.addListener('click', () => infoWindow.open(map, marker));
   }
 
   moveMarker = (id, event) => {
+    const { provider } = this.props;
     const { markers } = this.state;
-    const position = getNewMarkerPosition(event);
-    const updatedMarkers = updateMarkersAfterMove(markers, id, position);
+    const position = provider.getNewMarkerPosition(event);
+    const updatedMarkers = provider.updateMarkersAfterMove(markers, id, position);
     this.setState({ markers: updatedMarkers });
-    this.renderRoute(getPathsFromMarkers(updatedMarkers));
+    this.renderRoute(provider.getPathsFromMarkers(updatedMarkers));
   }
 
   deleteMarker = (id) => {
+    const { provider } = this.props;
     const { markers, renderedMarkers } = this.state;
     const newMarkers = markers.filter(marker => marker.id !== id);
-    removeMarkerFromMap(id, renderedMarkers);
+    provider.removeMarkerFromMap(id, renderedMarkers);
     this.setState({
       markers: newMarkers,
       renderedMarkers: renderedMarkers.filter(marker => marker.id !== id),
     });
-    this.renderRoute(getPathsFromMarkers(newMarkers));
+    this.renderRoute(provider.getPathsFromMarkers(newMarkers));
   }
 
   afterSort = ({ oldIndex, newIndex }) => {
+    const { provider } = this.props;
     const { markers } = this.state;
     const sortedMarkers = arrayMove(markers, oldIndex, newIndex);
     this.setState({
       markers: sortedMarkers,
     });
-    this.renderRoute(getPathsFromMarkers(sortedMarkers));
+    this.renderRoute(provider.getPathsFromMarkers(sortedMarkers));
   }
 
   renderRoute = (path) => {
+    const { provider } = this.props;
     const { map, route } = this.state;
     if (route) {
       route.setMap(null);
     }
-    const newRoute = createRoute(path);
+    const newRoute = provider.createRoute(path);
     newRoute.setMap(map);
     this.setState({
       route: newRoute,
@@ -85,17 +88,10 @@ export default class App extends React.Component {
   }
 
   renderMarker = (marker, mapInstance) => {
-    const { moveMarker } = this;
-    const { renderedMarkers, map } = this.state;
-    const { id } = marker;
-    const newMarker = createMarker(marker);
-    const infoWindow = createInfoWindow(marker.title);
-    newMarker.setMap(mapInstance);
-    newMarker.id = id;
-    newMarker.addListener('dragend', e => moveMarker(id, e));
-    newMarker.addListener('click', () => infoWindow.open(map, newMarker));
+    const { renderedMarkers } = this.state;
+    marker.setMap(mapInstance);
     this.setState({
-      renderedMarkers: [...renderedMarkers, newMarker],
+      renderedMarkers: [...renderedMarkers, marker],
     });
   }
 
