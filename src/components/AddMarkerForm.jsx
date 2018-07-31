@@ -13,40 +13,42 @@ export default class AddMarkerForm extends React.Component {
 
   submit = (e) => {
     e.preventDefault();
-    const { addMarker, map } = this.props;
+    const { addMarker, map: { center: { lat, lng } } } = this.props;
     const { value } = this.state;
-    addMarker({
-      title: value,
-      id: uniqueId(),
-      position: {
-        lat: map.center.lat(),
-        lng: map.center.lng(),
-      },
-      rendered: false,
-    });
-    this.setState({ value: '' });
+    if (value) {
+      addMarker({
+        title: value,
+        id: uniqueId(),
+        position: {
+          lat: lat(),
+          lng: lng(),
+        },
+        rendered: false,
+      });
+      this.setState({ value: '' });
+    }
   };
 
   updateMarkerName = (e) => {
     const { value } = e.target;
     this.setState({
       value,
-      isValid: value.length > 0
+      isValid: value.length > 0,
     });
   }
 
   render() {
-    const { value } = this.state;
+    const { value, isValid } = this.state;
     const inputClass = cn({
       'form-control': true,
-      'is-invalid': !this.state.isValid,
-    })
+      'is-invalid': !isValid,
+    });
     return (
-      <form className="form-inline mb-2 mt-3" onSubmit={this.submit}>
+      <form data-role="new-marker-form" className="form-inline mb-2 mt-3" onSubmit={this.submit}>
         <div className="form-group">
-          <input required className={inputClass} type="text" onChange={this.updateMarkerName} value={value} />
+          <input data-role="new-marker-field" required className={inputClass} type="text" onChange={this.updateMarkerName} value={value} />
         </div>
-        <button className="btn btn-xm btn-primary" type="submit">
+        <button data-role="new-marker-submit-button" className="btn btn-xm btn-primary btn-add-marker" type="submit">
           <span>Add marker</span>
         </button>
       </form>

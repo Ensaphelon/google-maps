@@ -4,14 +4,32 @@
 
 # Google maps route manager
 
+## Install
+
+``` bash
+npm install | make install
+```
+
 ## Build Setup
 
 ``` bash
-npm run build
+npm run build | make build
 ```
 
 ## Start development server
 
 ``` bash
-npm start
+npm run start | make start
+```
+
+## Eslint
+
+``` bash
+npm run eslint | make eslint
+```
+
+## Run test
+
+``` bash
+npm run test | make test
 ```

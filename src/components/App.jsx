@@ -20,20 +20,27 @@ export default class App extends React.Component {
     this.setState({ map: provider.initMap() });
   }
 
-  addMarker = (marker) => {
+  addMarker = (markerData) => {
+    const { renderMarker, renderRoute, bindMarkerEvents } = this;
     const { provider } = this.props;
-    const { renderMarker, renderRoute } = this;
     const { markers, map } = this.state;
-    const newMarkers = [...markers, marker];
+    const { id } = markerData;
+    const newMarkers = [...markers, markerData];
+    const marker = provider.createMarker(markerData);
+    const infoWindow = provider.createInfoWindow(markerData.title);
+    marker.id = id;
+    bindMarkerEvents(marker, infoWindow, map);
+    renderMarker(marker, map);
+    renderRoute(provider.getPathsFromMarkers(newMarkers));
     this.setState({
       markers: newMarkers,
     });
-    renderMarker(marker, map);
-    renderRoute(provider.getPathsFromMarkers(newMarkers));
   }
 
-  storeMapInComponent = (map) => {
-    this.setState({ map });
+  bindMarkerEvents = (marker, infoWindow, map) => {
+    const { moveMarker } = this;
+    marker.addListener('dragend', e => moveMarker(marker.id, e));
+    marker.addListener('click', () => infoWindow.open(map, marker));
   }
 
   moveMarker = (id, event) => {
@@ -81,18 +88,10 @@ export default class App extends React.Component {
   }
 
   renderMarker = (marker, mapInstance) => {
-    const { provider } = this.props;
-    const { moveMarker } = this;
-    const { renderedMarkers, map } = this.state;
-    const { id } = marker;
-    const newMarker = provider.createMarker(marker);
-    const infoWindow = provider.createInfoWindow(marker.title);
-    newMarker.setMap(mapInstance);
-    newMarker.id = id;
-    newMarker.addListener('dragend', e => moveMarker(id, e));
-    newMarker.addListener('click', () => infoWindow.open(map, newMarker));
+    const { renderedMarkers } = this.state;
+    marker.setMap(mapInstance);
     this.setState({
-      renderedMarkers: [...renderedMarkers, newMarker],
+      renderedMarkers: [...renderedMarkers, marker],
     });
   }
 

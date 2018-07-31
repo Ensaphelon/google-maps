@@ -1,8 +1,10 @@
 import { load, urlSettings } from 'google-maps-promise';
 import { polylineSettings } from '../settings';
+import Provider from './Provider';
 
-export default class Google {
+export default class Google extends Provider {
   constructor({ key, options, mapId }) {
+    super();
     this.key = key;
     this.options = options;
     this.mapId = mapId;
@@ -51,28 +53,9 @@ export default class Google {
     };
   }
 
-  getPathsFromMarkers = (markers) => {
-    return markers.reduce((acc, { position: { lat, lng } }) => {
-      return [...acc, { lat, lng }];
-    }, []);
-  }
-
-  updateMarkersAfterMove = (markers, id, position) => {
-    return markers.map((marker) => {
-      return marker.id !== id ? marker : {
-        title: marker.title,
-        id: marker.id,
-        position,
-      };
-    });
-  }
-
   removeMarkerFromMap = (id, markers) => {
-    markers.map((marker) => {
-      if (marker.id === id) {
-        marker.setMap(null);
-      }
-      return marker;
-    });
+    markers
+      .filter(marker => marker.id === id)
+      .map(marker => marker.setMap(null));
   }
 }
